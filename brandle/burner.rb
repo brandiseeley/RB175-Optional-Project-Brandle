@@ -1,6 +1,0 @@
-=begin
-Brandle class
-
-
-
-=end
