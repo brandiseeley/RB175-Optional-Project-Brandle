@@ -18,13 +18,15 @@
   <% end %>
 
   <!-- Guess input form -->
-  <div>
-    <form action="/play" method="post">
-      <label for="guess">Enter your guess:</label>
-      <input type="text" name="guess">
-      <input type="submit" value="make guess!">
-    </form>
-  </div>
+  <% if display_guess_form? %>
+    <div>
+      <form action="/play" method="post">
+        <label for="guess">Enter your guess:</label>
+        <input type="text" name="guess">
+        <input type="submit" value="make guess!">
+      </form>
+    </div>
+  <% end %>
 
   <div class="letter-bank">
     <% @letter_bank.keys.each do |letter| %>

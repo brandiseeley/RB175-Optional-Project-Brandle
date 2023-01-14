@@ -17,6 +17,8 @@ before do
   @guesses = session[:guesses]
 end
 
+### VIEW HELPERS ###
+
 helpers do
   def guesses_in_table(guesses)
     rows = ""
@@ -37,7 +39,16 @@ helpers do
   def letter_class(letter)
     session[:letter_bank][letter]
   end
+
+  def display_guess_form?
+    guesses = session[:guesses]
+    return false if guesses.include?(session[:word])
+    return false if guesses.size > 4
+    true
+  end
 end
+
+### APP HELPERS ###
 
 def new_game
   session[:word] = CSV.read("wordbank.csv").flatten.sample
@@ -64,11 +75,10 @@ def correct?(letter)
 end
 
 def game_over?
-  if @guesses.size == 4 && !won?
+  if @guesses.size > 4 && !won?
     session[:message] = "You ran out of guesses! Try again."
-  elsif @guesses.size <= 4 && won?
+  elsif @guesses.size <= 5 && won?
     session[:message] = "You won!"
-    redirect "/play"
   end
 end
 
