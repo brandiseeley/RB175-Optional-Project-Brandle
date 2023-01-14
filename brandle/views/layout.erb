@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<h1>Welcome to Brandle!</h1>
+<head>
+  <title>Brandle</title>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/stylesheets/brandle.css">
+</head>
+<body>
+  <!-- Show Error message if any -->
+  <% if session[:message] %>
+    <p><%= session.delete(:message) %></p>
+  <% end %>
+
+  <%= yield %>
+
+</body>
+</html>

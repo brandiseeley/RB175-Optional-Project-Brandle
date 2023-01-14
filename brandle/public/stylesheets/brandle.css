@@ -1,0 +1,14 @@
+button.correct {
+  background-color: green;
+}
+
+button.present {
+  background-color: yellow;
+}
+
+button.not-present {
+  background-color: lightslategray;
+}
+
+button.not-guessed {
+}

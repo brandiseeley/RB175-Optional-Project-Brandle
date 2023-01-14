@@ -1,0 +1,39 @@
+  <!-- Display word for testing -->
+  <p>The word is: <%= @word %></p>
+
+  <!-- Display guesses in table -->
+  <% if @guesses %>
+    <div class="guesses">
+      <table>
+        <thead>
+          <tr>
+            <th colspan="5">Guesses</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= guesses_in_table(@guesses) %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+
+  <!-- Guess input form -->
+  <div>
+    <form action="/play" method="post">
+      <label for="guess">Enter your guess:</label>
+      <input type="text" name="guess">
+      <input type="submit" value="make guess!">
+    </form>
+  </div>
+
+  <div class="letter-bank">
+    <% @letter_bank.keys.each do |letter| %>
+      <button class=<%= letter_class(letter) %>><%= letter %></button>
+    <% end %>
+  </div>
+
+  <div>
+  <form action="/reset" method="get">
+    <input type="submit" value="New Game">
+  </form>
+  </div>
