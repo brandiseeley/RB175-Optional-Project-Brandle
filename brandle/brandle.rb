@@ -1,7 +1,6 @@
 require 'sinatra'
 require 'sinatra/reloader'
 require 'tilt/erubis'
-require 'csv'
 require 'pry-byebug'
 
 configure do
@@ -70,7 +69,7 @@ end
 ### APP HELPERS ###
 
 def new_game
-  session[:word] = CSV.read("wordbank.csv").flatten.sample
+  session[:word] = File.read("public/data/answers.txt").split.sample
   session[:letter_bank] = generate_letter_hash
   session[:guesses] = []
 end
