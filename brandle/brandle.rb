@@ -34,11 +34,29 @@ helpers do
   end
 
   def word_as_table_row(word)
-    word.chars.map { |letter| "<td class=#{letter_bank_class(letter)}>#{letter}</td>" }.join
+    html_string = ""
+    word.chars.each_with_index do |letter, index|
+      letter_class = guess_letter_class(letter, index)
+      html_string << "<td class=#{letter_class}>#{letter}</td>"
+    end
+    html_string
   end
 
   def letter_bank_class(letter)
     session[:letter_bank][letter]
+  end
+
+  def guess_letter_class(letter, index)
+    word = session[:word]
+    if letter == "_"
+      "blank"
+    elsif word[index] == letter
+      "correct"
+    elsif word.include?(letter)
+      "present"
+    else
+      "not-present"
+    end
   end
 
   def display_guess_form?
@@ -64,7 +82,16 @@ def generate_letter_hash
 end
 
 def valid_guess?(word)
-  word.count("a-zA-Z") == 5 && word.length == 5
+  if word.count("a-zA-Z") != 5 || word.length != 5
+    session[:message] = "Guesses must be 5 letter words"
+    return false
+  end
+  allowed_bank = File.read("public/data/allowed.txt").split
+  if !allowed_bank.include?(word.downcase)
+    session[:message] = "#{word} is not a valid guess."
+    return false
+  end
+  true
 end
 
 def game_started?
@@ -104,8 +131,8 @@ def update_letter_bank(guess)
         letter_bank[letter] = "not-present"
       end
     end
-  else
-    session[:message] = "Guesses must be 5 letter words"
+  # else
+    # session[:message] = "Guesses must be 5 letter words"
   end
 end
 

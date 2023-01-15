@@ -43,6 +43,16 @@ td.correct {
 td.present {
   background-color: yellow;
 }
+
+td.not-present {
+  background-color: lightslategray;
+}
+
+/* LETTER BANK */
+#letter-bank {
+  margin-top: .5em;
+}
+
 button.correct {
   background-color: green;
 }
@@ -54,12 +64,6 @@ button.present {
 button.not-present {
   background-color: lightslategray;
 }
-
-/* LETTER BANK */
-#letter-bank {
-  margin-top: .5em;
-}
-
 
 button {
   margin: 6px 2px;
