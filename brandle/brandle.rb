@@ -71,12 +71,13 @@ end
 
 def new_game
   session[:word] = File.read("public/data/answers.txt").split.sample
-  session[:letter_bank] = generate_letter_hash
+  session[:letter_bank] = generate_letter_bank
   session[:guesses] = []
 end
 
-def generate_letter_hash  
-  ('A'..'Z').each_with_object({}) do |letter, hash|
+def generate_letter_bank
+  qwerty = %w(Q W E R T Y U I O P A S D F G H J K L Z X C V B N M)
+  qwerty.each_with_object({}) do |letter, hash|
     hash[letter] = "not-guessed"
   end
 end

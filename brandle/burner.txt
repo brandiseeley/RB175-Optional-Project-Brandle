@@ -13,3 +13,7 @@ x creat login path (don't worry about creating new users yet)
 
 
 - implement ":username/play" to be play as normal, but to keep track of wins and losses/played words
+
+*** TODO ***
+O Divide letter bank into correct rows for qwerty setup
+O Add a 6th guess rows
