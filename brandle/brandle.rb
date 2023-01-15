@@ -6,6 +6,7 @@ require 'pry-byebug'
 
 configure do
   enable :sessions
+  enable :reloader
 end
 
 before do
@@ -33,10 +34,10 @@ helpers do
   end
 
   def word_as_table_row(word)
-    word.chars.map { |letter| "<td>#{letter}</td>" }.join
+    word.chars.map { |letter| "<td class=#{letter_bank_class(letter)}>#{letter}</td>" }.join
   end
 
-  def letter_class(letter)
+  def letter_bank_class(letter)
     session[:letter_bank][letter]
   end
 

@@ -3,7 +3,7 @@
 
   <!-- Display guesses in table -->
   <% if @guesses %>
-    <div class="guesses">
+    <div id="guesses">
       <table>
         <thead>
           <tr>
@@ -28,9 +28,9 @@
     </div>
   <% end %>
 
-  <div class="letter-bank">
+  <div id="letter-bank">
     <% @letter_bank.keys.each do |letter| %>
-      <button class=<%= letter_class(letter) %>><%= letter %></button>
+      <button class=<%= letter_bank_class(letter) %>><%= letter %></button>
     <% end %>
   </div>
 

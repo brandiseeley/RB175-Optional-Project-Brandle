@@ -1,3 +1,48 @@
+/* GENERAL */
+body {
+  font-size: 2em;
+  width: 30%;
+  font-family: sans-serif;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1em;
+}
+
+p {
+  margin: 0;
+}
+
+input {
+  height: 2.3em;
+}
+
+
+/* TABLE */
+
+table {
+  width: 70%;
+  height: 100%;
+  padding: 5%;
+}
+
+td {
+  width: 15%;
+}
+
+
+table, th, td {
+  border: 2px solid;
+}
+
+td.correct {
+  background-color: green;
+}
+
+td.present {
+  background-color: yellow;
+}
 button.correct {
   background-color: green;
 }
@@ -10,5 +55,16 @@ button.not-present {
   background-color: lightslategray;
 }
 
-button.not-guessed {
+/* LETTER BANK */
+#letter-bank {
+  margin-top: .5em;
+}
+
+
+button {
+  margin: 6px 2px;
+  width: 8%;
+  height: 3em;
+  font-weight: 900;
+  font-size: .6em;
 }
