@@ -1,0 +1,15 @@
+Implementing User Sign on
+
+x Update current path to be "play as guest"
+x create new 'users' file...yaml? 
+x create 'login' form next to "play as guest" form
+x creat login path (don't worry about creating new users yet)
+- Implement plaintext login
+- if unsuccessful, redirect to login with option to go back home
+- if successful, redirect to ":username/play"
+- for now, let username/play be the same as normal play
+- celebrate!
+- encrypt passwords, BCrypt?
+
+
+- implement ":username/play" to be play as normal, but to keep track of wins and losses/played words

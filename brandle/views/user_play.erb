@@ -1,0 +1,45 @@
+  <!-- Display word for testing -->
+  <p>Hi, <%= session[:user] %>
+  <p>The word is: <%= @word %></p>
+
+  <!-- Display guesses in table -->
+  <% if @guesses %>
+    <div id="guesses">
+      <table>
+        <thead>
+          <tr>
+            <th colspan="5">Guesses</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= guesses_in_table(@guesses) %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+
+  <!-- Guess input form -->
+  <% if display_guess_form? %>
+    <div>
+      <form action="/<%= session[:user] %>/play" method="post">
+        <label for="guess">Enter your guess:</label>
+        <input type="text" name="guess">
+        <input type="submit" value="make guess!">
+      </form>
+    </div>
+  <% end %>
+
+  <div id="letter-bank">
+    <% @letter_bank.keys.each do |letter| %>
+      <button class=<%= letter_bank_class(letter) %>><%= letter %></button>
+    <% end %>
+  </div>
+
+  <div>
+  <form action="/reset" method="get">
+    <input type="submit" value="New Game">
+  </form>
+  <form action="/" method="get">
+    <input type="submit" value="Home">
+  </form>
+  </div>

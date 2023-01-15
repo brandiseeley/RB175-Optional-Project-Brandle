@@ -9,7 +9,7 @@
     <h1>Welcome to Brandle!</h1>
     <!-- Show Error message if any -->
     <% if session[:message] %>
-      <p><%= session.delete(:message) %></p>
+      <p id="message"><%= session.delete(:message) %></p>
     <% end %>
 
     <%= yield %>

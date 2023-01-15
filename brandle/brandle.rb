@@ -2,6 +2,7 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'tilt/erubis'
 require 'pry-byebug'
+require 'yaml'
 
 configure do
   enable :sessions
@@ -86,7 +87,7 @@ def valid_guess?(word)
     return false
   end
   allowed_bank = File.read("public/data/allowed.txt").split
-  if !allowed_bank.include?(word.downcase)
+  if !allowed_bank.include?(word)
     session[:message] = "#{word} is not a valid guess."
     return false
   end
@@ -110,11 +111,14 @@ def game_over?
 end
 
 def won?
-  @letter_bank.count { |letter, state| state == "correct" } == 5
+  letters_to_check = @guesses[-1].chars.uniq
+  letters_to_check.each_with_index do |letter, index|
+    return false if guess_letter_class(letter, index) != "correct"
+  end
+  true
 end
 
 def update_letter_bank(guess)
-  guess.upcase!
   if valid_guess?(guess)
     word = session[:word]
     letter_bank = session[:letter_bank]
@@ -130,27 +134,89 @@ def update_letter_bank(guess)
         letter_bank[letter] = "not-present"
       end
     end
-  # else
-    # session[:message] = "Guesses must be 5 letter words"
   end
 end
+
+def load_user_credentials
+  path = File.expand_path("../user_data/users.yml", __FILE__)
+  YAML.load_file(path)
+end
+
+def valid_login?(username, password)
+  credentials = load_user_credentials
+  return false unless credentials.key?(username)
+  return true if credentials[username] == password
+  false
+end
+
+def logged_in?(username)
+  session[:user] = username
+end
+
+### ROUTES ###
 
 get "/" do
   erb :home
 end
 
 get "/play" do
-  erb :play
+  erb :guest_play
 end
 
 post "/play" do
-  guess = params[:guess]
-  update_letter_bank(guess)
-  game_over?
-  erb :play
+  guess = params[:guess].upcase
+  if valid_guess?(guess)
+    update_letter_bank(guess)
+    game_over?
+    erb :guest_play
+  else
+    erb :guest_play
+  end
+end
+
+get "/:username/play" do
+  erb :user_play
+end
+
+post "/:username/play" do
+  guess = params[:guess].upcase
+  if valid_guess?(guess)
+    update_letter_bank(guess)
+    game_over?
+    erb :user_play
+  else
+    erb :user_play
+  end
 end
 
 get "/reset" do
+  user = session[:user]
   session.clear
-  redirect "/play"
+  if user.nil?
+    redirect "/play"
+  else
+    session[:user] = user
+    redirect "/#{user}/play"
+  end
+end
+
+get "/login" do
+  erb :login
+end
+
+post "/login" do
+  username = params[:username]
+  password = params[:password]
+
+  if username.empty? || password.empty?
+    session[:message] = "Missing Fields"
+    redirect "/login"
+  end
+
+  if valid_login?(username, password)
+    session[:user] = username
+    redirect "/#{username}/play"
+  end
+  session[:message] = "Invalid Username and/or Password"
+  redirect "/login"
 end
