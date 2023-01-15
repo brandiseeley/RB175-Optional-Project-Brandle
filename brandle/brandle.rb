@@ -161,7 +161,6 @@ def require_login(username)
   end
 end
 
-
 ### ROUTES ###
 
 get "/" do
