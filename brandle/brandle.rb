@@ -151,8 +151,16 @@ def valid_login?(username, password)
 end
 
 def logged_in?(username)
-  session[:user] = username
+  session[:user] == username
 end
+
+def require_login(username)
+  if !logged_in?(username)
+    session[:message] = "You must be logged in to access that page"
+    redirect "/login"
+  end
+end
+
 
 ### ROUTES ###
 
@@ -176,10 +184,12 @@ post "/play" do
 end
 
 get "/:username/play" do
+  require_login(params[:username])
   erb :user_play
 end
 
 post "/:username/play" do
+  require_login(params[:username])
   guess = params[:guess].upcase
   if valid_guess?(guess)
     update_letter_bank(guess)
