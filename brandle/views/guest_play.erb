@@ -11,7 +11,7 @@
           </tr>
         </thead>
         <tbody>
-          <%= guesses_in_table(@guesses) %>
+          <%= guesses_to_table(@guesses) %>
         </tbody>
       </table>
     </div>
@@ -20,7 +20,7 @@
   <!-- Guess input form -->
   <% if display_guess_form? %>
     <div>
-      <form action="/play" method="post">
+      <form autocomplete="off" action="/play" method="post">
         <label for="guess">Enter your guess:</label>
         <input type="text" name="guess">
         <input type="submit" value="make guess!">

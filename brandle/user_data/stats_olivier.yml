@@ -1,7 +1,13 @@
 ---
-games: 8
-won: 8
-lost: 0
+games: 14
+won: 11
+lost: 3
 played:
 - BADLY
 - DINGY
+- LILAC
+- SPITE
+- ALTAR
+- LEERY
+- BOUND
+- EVADE
