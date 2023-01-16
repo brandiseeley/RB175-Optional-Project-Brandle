@@ -1,6 +1,6 @@
   <!-- Display word for testing -->
   <p>Hi, <%= session[:user] %>
-  <!--<p>The word is: <%= @word %></p>-->
+  <p>The word is: <%= @word %></p>
 
   <!-- Display guesses in table -->
   <% if @guesses %>
@@ -43,3 +43,5 @@
     <input type="submit" value="Home">
   </form>
   </div>
+
+  <%= stats_to_list(session[:user]) %>

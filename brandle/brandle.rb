@@ -65,14 +65,38 @@ helpers do
     return false if guesses.size > 4
     true
   end
+
+  def stats_to_list(username)
+    stats = load_stats(username)
+    list = "<ul>"
+    list << "<li>Wins: #{stats["won"]}</li> "
+    list << "<li>Losses: #{stats["lost"]}</li> "
+    list
+  end
 end
 
 ### APP HELPERS ###
 
 def new_game
-  session[:word] = File.read("public/data/answers.txt").split.sample
+  session[:word] = fetch_new_word
   session[:letter_bank] = generate_letter_bank
   session[:guesses] = []
+end
+
+def fetch_new_word
+  word = File.read("public/data/answers.txt").split.sample
+  return word if session[:user].nil?
+  already_played = played_words
+  loop do
+    return word unless already_played.include?(word)
+    word = File.read("public/data/answers.txt").split.sample
+  end
+end
+
+# returns nil if no user logged in, otherwise an array of words that have been played
+def played_words
+  return nil if session[:user].nil?
+  return load_stats(session[:user])["played"]
 end
 
 def generate_letter_bank
@@ -105,9 +129,19 @@ end
 
 def game_over?
   if @guesses.size > 4 && !won?
-    session[:message] = "You ran out of guesses! Try again."
+    true
   elsif @guesses.size <= 5 && won?
+    true
+  else
+    false
+  end
+end
+
+def set_game_over_message
+  if won?
     session[:message] = "You won!"
+  else
+    session[:message] = "You ran out of guesses! Try again."
   end
 end
 
@@ -161,6 +195,20 @@ def require_login(username)
   end
 end
 
+def load_stats(username)
+  YAML.load_file("user_data/stats_#{username}.yml")
+end
+
+def update_stats
+  stats = load_stats(session[:user])
+  stats["games"] += 1
+  stats["won"] += 1 if won?
+  stats["lost"] +=1 if !won?
+  File.open("user_data/stats_#{session[:user]}.yml", "w") do |file|
+    YAML.dump(stats, file)
+  end
+end
+
 ### ROUTES ###
 
 get "/" do
@@ -192,7 +240,10 @@ post "/:username/play" do
   guess = params[:guess].upcase
   if valid_guess?(guess)
     update_letter_bank(guess)
-    game_over?
+    if game_over?
+      set_game_over_message
+      update_stats
+    end
     erb :user_play
   else
     erb :user_play
