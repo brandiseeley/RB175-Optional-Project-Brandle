@@ -1,6 +1,6 @@
 ---
-games: 14
-won: 11
+games: 15
+won: 12
 lost: 3
 played:
 - BADLY
@@ -11,3 +11,4 @@ played:
 - LEERY
 - BOUND
 - EVADE
+- SADLY

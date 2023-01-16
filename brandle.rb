@@ -1,7 +1,7 @@
+require 'pry-byebug'
 require 'sinatra'
 require 'sinatra/reloader'
 require 'tilt/erubis'
-require 'pry-byebug'
 require 'yaml'
 
 configure do
@@ -18,7 +18,7 @@ end
 =end
 
 before do
-  if !game_started?
+  if session[:word].nil?
     new_game
   end
   @word = session[:word]
@@ -60,11 +60,14 @@ helpers do
   
   # output: HTML String
   # Returns unordered list element populated with user statistics
+
+  # Better function names
   def stats_to_list(username)
     stats = load_stats(username)
     list = "<ul>"
     list << "<li>Wins: #{stats["won"]}</li> "
     list << "<li>Losses: #{stats["lost"]}</li> "
+    # </ul>
     list
   end
 
@@ -97,36 +100,54 @@ end
 ### APP HELPERS ###
 
 def new_game
-  session[:word] = fetch_new_word
+  new_word = fetch_new_word
+  add_played_word_to_stats(new_word)
+
+  session[:word] = new_word
   session[:letter_bank] = generate_letter_bank
   session[:guesses] = []
 end
 
-# Will return random word from bank if playing as guest
-# Will return word that *hasn't* been played by user if logged in and update 'played' words
+# If playing as guest, will return random word from bank.
+# If user is logged in, will return word that *hasn't* been played by user and will update 'played' words.
 def fetch_new_word
-  word = File.read("public/data/answers.txt").split.sample
-  return word if session[:user].nil?
-  already_played = load_played_words
-  # Assumes user hasn't played most possible words 
-  # Won't terminate if played all, very ineffecient if played most
-  # ??? Create "unplayed" word bank for users instead of 'played'?
-  loop do
-    break unless already_played.include?(word)
-    word = File.read("public/data/answers.txt").split.sample
-  end
-  stats = load_stats(session[:user])
-  stats["played"] << word
-  File.open("user_data/stats_#{session[:user]}.yml", "w") do |file|
-    YAML.dump(stats, file)
+  # TODO: Use a list of 'unplayed' words for logged in users, for better performance.
+  words_already_played = load_played_words
+  word_bank = fetch_word_bank
+  selected_word_ok = false
+  while !selected_word_ok
+    word = word_bank.sample
+    if session[:user].nil?
+      selected_word_ok = true
+    else
+      selected_word_ok = !words_already_played.include?(word)
+    end
   end
   word
 end
 
-# returns nil if no user logged in, otherwise an array of words that have been played
+def fetch_word_bank
+  File.read("public/data/answers.txt").split
+end
+
+def overwrite_stats(new_stats)
+  File.open("user_data/stats_#{session[:user]}.yml", "w") do |file|
+    YAML.dump(new_stats, file)
+  end
+end
+
+
+def add_played_word_to_stats(word)
+  return if session[:user].nil?
+  stats = load_stats(session[:user])
+  stats["played"] << word
+  overwrite_stats(stats)
+end
+
+# For guest user, returns empty array.
 def load_played_words
-  return nil if session[:user].nil?
-  return load_stats(session[:user])["played"]
+  return [] if session[:user].nil?
+  load_stats(session[:user])["played"]
 end
 
 def generate_letter_bank
@@ -136,44 +157,28 @@ def generate_letter_bank
   end
 end
 
-# ??? Implement invalid_guess_message ???
+def is_five_letters?(word)
+  word.count("a-zA-Z") == 5 && word.length == 5
+end
+
+def fetch_allowed_words
+  File.read("public/data/allowed.txt").split
+end
+
+# TODO: Implement invalid_guess_message
 def valid_guess?(word)
-  if word.count("a-zA-Z") != 5 || word.length != 5
-    session[:message] = "Guesses must be 5 letter words"
-    return false
-  end
-  allowed_bank = File.read("public/data/allowed.txt").split
-  if !allowed_bank.include?(word)
-    session[:message] = "#{word} is not a valid guess."
-    return false
-  end
-  true
+  return false if !is_five_letters?(word)
+  allowed_bank = fetch_allowed_words
+  return allowed_bank.include?(word)
 end
 
-def game_started?
-  session[:word]
-end
-
-def correct?(letter)
-  session[:letter_bank][letter] == "correct"
-end
-
-def game_over?
-  if @guesses.size > 5
-    true
-  elsif @guesses.size <= 6 && won?
-    true
+def set_invalid_guess_message(word)
+  if !is_five_letters?(word)
+    message = "Guesses must be 5 letter words"
   else
-    false
+    message = "#{word} is not a valid guess."
   end
-end
-
-def set_game_over_message
-  if won?
-    session[:message] = "You won!"
-  else
-    session[:message] = "You ran out of guesses! Try again."
-  end
+  session[:message] = message
 end
 
 def won?
@@ -183,6 +188,14 @@ def won?
     return false if guess_letter_class(letter, index) != "correct"
   end
   true
+end
+
+def game_over?
+  @guesses.size > 5 || won?
+end
+
+def set_game_over_message
+  session[:message] = won? ? "You won!" : "You ran out of guesses! Try again."
 end
 
 def update_guesses(guess)
@@ -196,7 +209,7 @@ def update_letter_bank(guess)
     if word[index] == letter
       letter_bank[letter] = "correct"
     elsif word.include?(letter)
-      if !correct?(letter)
+      if session[:letter_bank][letter] != "correct"
         letter_bank[letter] = "present"
       end
     else
@@ -213,8 +226,7 @@ end
 def valid_login?(username, password)
   credentials = load_user_credentials
   return false unless credentials.key?(username)
-  return true if credentials[username] == password
-  false
+  credentials[username] == password
 end
 
 def logged_in?(username)
@@ -232,13 +244,25 @@ def load_stats(username)
   YAML.load_file("user_data/stats_#{username}.yml")
 end
 
-def update_stats
+def add_game_result_to_stats
+  return if session[:user].nil?
   stats = load_stats(session[:user])
   stats["games"] += 1
   stats["won"] += 1 if won?
   stats["lost"] +=1 if !won?
-  File.open("user_data/stats_#{session[:user]}.yml", "w") do |file|
-    YAML.dump(stats, file)
+  overwrite_stats(stats)
+end
+
+def process_guess(word)
+  if valid_guess?(word)
+    update_guesses(word)
+    update_letter_bank(word)
+    if game_over?
+      set_game_over_message
+      add_game_result_to_stats
+    end
+  else
+    set_invalid_guess_message(word)
   end
 end
 
@@ -252,32 +276,19 @@ get "/play" do
   erb :guest_play
 end
 
-post "/play" do
-  guess = params[:guess].upcase
-  if valid_guess?(guess)
-    update_guesses(guess)
-    update_letter_bank(guess)
-    set_game_over_message if game_over?
-  end
-  erb :guest_play
-end
-
 get "/:username/play" do
   require_login(params[:username])
   erb :user_play
 end
 
+post "/play" do
+  process_guess(params[:guess].upcase)
+  erb :guest_play
+end
+
 post "/:username/play" do
   require_login(params[:username])
-  guess = params[:guess].upcase
-  if valid_guess?(guess)
-    update_guesses(guess)
-    update_letter_bank(guess)
-    if game_over?
-      set_game_over_message
-      update_stats
-    end
-  end
+  process_guess(params[:guess].upcase)
   erb :user_play
 end
 

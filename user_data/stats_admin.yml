@@ -1,7 +1,7 @@
 ---
-games: 28
-won: 16
-lost: 12
+games: 32
+won: 19
+lost: 13
 played:
 - ADOBE
 - QUAKE
@@ -24,3 +24,9 @@ played:
 - OUTDO
 - BLEED
 - FEMUR
+- BLITZ
+- GOUGE
+- USUAL
+- FERRY
+- STEAM
+- THIEF
